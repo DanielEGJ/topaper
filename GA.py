@@ -49,14 +49,14 @@ y_train = y_train2
 #Data space 'elu', 'exponential', 'gelu', 'linear', 'relu', 'selu',
 ####################################################################
 dataActivationFunction = ['elu', 'exponential', 'gelu', 'linear', 'relu', 'selu', 'sigmoid', 'tanh']
-dataOptimizers = [tf.keras.optimizers.legacy.Adadelta(), 
-                tf.keras.optimizers.legacy.Adagrad(), 
-                tf.keras.optimizers.legacy.Adam(),
-                tf.keras.optimizers.legacy.Adamax(),
-                tf.keras.optimizers.legacy.Ftrl(),
-                tf.keras.optimizers.legacy.Nadam(),
-                tf.keras.optimizers.legacy.RMSprop(),
-                tf.keras.optimizers.legacy.SGD()]
+dataOptimizers = [tf.keras.optimizers.Adadelta(), 
+                tf.keras.optimizers.Adagrad(), 
+                tf.keras.optimizers.Adam(),
+                tf.keras.optimizers.Adamax(),
+                tf.keras.optimizers.Ftrl(),
+                tf.keras.optimizers.Nadam(),
+                tf.keras.optimizers.RMSprop(),
+                tf.keras.optimizers.SGD()]
 
 dataInitializers = [tf.keras.initializers.GlorotNormal(),
                     tf.keras.initializers.GlorotUniform(),
@@ -181,7 +181,8 @@ class sample:
 
     def fitnessModel(self, verbose):
         model = self.buildModel()
-        model.summary()
+        if verbose:
+            model.summary()
         history, loss_test, score_test, loss_val, score_val, model = self.trainModel(model, verbose)
         return model, score_test, score_val, history
 
@@ -243,7 +244,7 @@ class sample:
         model.save(f'{dirMaker}{gen}/model{sampleN}-{popType}:it_{gen},score_{score_val:.4f}.h5')
 
 class GA:
-    def __init__(self, sizePopulation, sizeTournament, history=True, save=True, historySamples=10, debug=False, verbose=False):
+    def __init__(self, sizePopulation, sizeTournament, history=True, save=True, historySamples=10, debug=False, verbose=False, debugConsole=False):
         self.population = []
         self.newPopulation = []
         self.sizePopulation = sizePopulation
@@ -260,6 +261,7 @@ class GA:
         self.historySamples= historySamples
         self.debug = debug
         self.verbose = verbose
+        self.debugConsole = debugConsole
         
         os.mkdir(dirMaker+f'0')
 
@@ -282,12 +284,18 @@ class GA:
                 self.populationFitTest.append(score_test)
                 params = np.sum([np.prod(v.get_shape().as_list()) for v in model.trainable_variables])
                 self.populationParams.append(params)
+
+                if self.debugConsole:
+                    print(f'>>>>>> iniPopulation: {i} // val: {score_val} // test: {score_test} // params: {params}')
             
                 model, score_test, score_val, hist = self.newPopulation[i].fitnessModel(self.verbose)
                 self.newPopulationFit.append(score_val)
                 self.newPopulationFitTest.append(score_test)
                 params = np.sum([np.prod(v.get_shape().as_list()) for v in model.trainable_variables])
                 self.newPopulationParams.append(params)
+
+                if self.debugConsole:
+                    print(f'>>>>>> iniOffspring: {i} // val: {score_val} // test: {score_test} // params: {params}')
 
         fullPopulation, fullPopulationFit, fullPopulationFitTest, fullPopulationParams = self.sortPopulationsByFit()
         self.setPopulation(fullPopulation, fullPopulationFit, fullPopulationFitTest, fullPopulationParams)
@@ -486,6 +494,9 @@ class GA:
                 self.newPopulationFitTest[i] = score_test   
                 params = np.sum([np.prod(v.get_shape().as_list()) for v in model.trainable_variables])
                 self.newPopulationParams[i] = params
+
+                if self.debugConsole:
+                    print(f'>>>>>> evalModel: {i} // val: {score_val} // test: {score_test} // params: {params}')
     
     def saveGeneration(self):
         for i in range(self.sizePopulation):
@@ -572,26 +583,8 @@ worker = GA(
     save=True,
     historySamples=10,
     debug=False,
-    verbose=False)
+    verbose=False,
+    debugConsole=True)
 
 worker.runGeneticAlgorithm(generations = 25)
 
-
-
-
-
-
-
-'''
-for i in range(10):
-    GeneticAlgorithm.runGeneticAlgorithm(
-        tol = 0.1,
-        generations = 15,
-        stopCondition=False,
-        probCross=1,
-        probMuta=1/25,
-        showBestPerGeneration=True,
-        showPopulationsPerGeneration=False,
-        genHistory=True,
-        name=f'{i}.txt')
-'''
