@@ -173,7 +173,7 @@ class sample:
                             validation_data=(x_val, y_val), 
                             batch_size=int(self.paramsCont[1]), verbose=verbose)
     
-        val_loss, val_acc = model.evaluate(x_val, y_val, verbose=2)
+        val_loss, val_acc = model.evaluate(x_val, y_val, verbose=verbose)
 
         test_loss, test_acc = model.evaluate(x_test, y_test, verbose=verbose)
 
@@ -437,10 +437,10 @@ class GA:
         for i in range(self.sizePopulation):
             mutation = rn.uniform(0,1)
             if mutation <= mutationProb:
-                archConv, archConvK, archConvPD, archDen, archDenPD = self.newPopulation[i].getArch()
-                newArchConv = np.random.permutation(archConv)
-                newArchConvK = np.random.permutation(archConvK)
-                newArchDen = np.random.permutation(archDen)
+                tmpArchConv, tmpArchConvK, tmpArchConvPD, tmpArchDen, tmpArchDenPD = self.newPopulation[i].getArch()
+                newArchConv = np.random.permutation(tmpArchConv)
+                newArchConvK = np.random.permutation(tmpArchConvK)
+                newArchDen = np.random.permutation(tmpArchDen)
                 self.newPopulation[i].setArch(newArchConv, newArchConvK, newArchDen)          
 
     def populationMutate(self):
@@ -577,7 +577,7 @@ class GA:
             print(f'Acc: {self.matingPoolFit[i]}')
 
 worker = GA(
-    sizePopulation=40, 
+    sizePopulation=20, 
     sizeTournament=5, 
     history=True,
     save=True,
@@ -588,3 +588,22 @@ worker = GA(
 
 worker.runGeneticAlgorithm(generations = 25)
 
+
+
+
+
+
+
+'''
+for i in range(10):
+    GeneticAlgorithm.runGeneticAlgorithm(
+        tol = 0.1,
+        generations = 15,
+        stopCondition=False,
+        probCross=1,
+        probMuta=1/25,
+        showBestPerGeneration=True,
+        showPopulationsPerGeneration=False,
+        genHistory=True,
+        name=f'{i}.txt')
+'''
