@@ -577,7 +577,7 @@ class GA:
             print(f'Acc: {self.matingPoolFit[i]}')
 
 worker = GA(
-    sizePopulation=20, 
+    sizePopulation=25, 
     sizeTournament=5, 
     history=True,
     save=True,
@@ -586,7 +586,7 @@ worker = GA(
     verbose=False,
     debugConsole=True)
 
-worker.runGeneticAlgorithm(generations = 25)
+worker.runGeneticAlgorithm(generations = 15)
 
 
 
